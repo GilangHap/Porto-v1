@@ -1,0 +1,79 @@
+// Prisma Schema for Portfolio CMS
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// PORTFOLIO MODELS
+// ============================================
+
+model Project {
+  id               String   @id @default(cuid())
+  title            String
+  shortDescription String
+  overview         String
+  role             String
+  features         String   // JSON array stored as string
+  techStack        String   // JSON array stored as string
+  screenshots      String   // JSON array stored as string
+  githubUrl        String?
+  liveUrl          String?
+  order            Int      @default(0)
+  isVisible        Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   // Frontend, Backend, Database, System & Tools
+  description String?
+  icon        String?  // Icon name from lucide-react
+  order       Int      @default(0)
+  isVisible   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Experience {
+  id          String    @id @default(cuid())
+  title       String
+  company     String
+  description String
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  order       Int       @default(0)
+  isVisible   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model About {
+  id          String   @id @default(cuid())
+  summary     String
+  education   String
+  focusAreas  String   // JSON array stored as string
+  internship  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSettings {
+  id           String   @id @default(cuid())
+  heroTitle    String   @default("Gilang Happy Dwinugroho")
+  heroSubtitle String   @default("Informatics Undergraduate • Web Developer • System Builder")
+  heroDescription String @default("I build scalable web systems with clean architecture, modern UI, and security-aware implementation.")
+  email        String   @default("")
+  github       String   @default("")
+  linkedin     String   @default("")
+  whatsapp     String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
