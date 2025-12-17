@@ -277,23 +277,12 @@ export default function Hero({ settings }: HeroProps) {
               </motion.span>
             </motion.p>
 
-            {/* Title with letter animation */}
+            {/* Title with word animation */}
             <motion.h1
               variants={itemVariants}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight overflow-hidden"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
             >
-              {subtitle.split("").map((char, i) => (
-                <motion.span
-                  key={i}
-                  custom={i}
-                  variants={letterVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className={char === " " ? "inline" : "inline-block gradient-text"}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </motion.span>
-              ))}
+              <span className="gradient-text">{subtitle}</span>
             </motion.h1>
 
             {/* Description with typing effect */}
