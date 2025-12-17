@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
-import { ExternalLink, Github, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { ExternalLink, Github, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
+import Image from "next/image";
 import ProjectModal, { Project } from "../ProjectModal";
 
 interface ProjectsProps {
@@ -60,114 +60,135 @@ export default function Projects({ projects }: ProjectsProps) {
   };
 
   return (
-    <section id="projects" className="section relative">
-      <div className="container mx-auto px-6" ref={ref}>
-        {/* Section Header */}
+    <section id="projects" className="section relative overflow-hidden">
+      {/* Subtle Background */}
+      <div className="absolute inset-0 grid-bg opacity-20" />
+
+      <div className="container mx-auto px-6 relative z-10" ref={ref}>
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="mb-16"
+          className="mb-16 text-center"
         >
-          <h2 className="section-title gradient-text">Featured Projects</h2>
-          <p className="text-[var(--text-secondary)] mt-6 max-w-2xl">
-            A selection of projects that showcase my skills in building complete, production-ready systems.
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <span className="text-[var(--text-primary)]">Featured </span>
+            <span className="gradient-text">Projects</span>
+          </h2>
+          <p className="text-[var(--text-secondary)] max-w-xl mx-auto">
+            Production-ready systems built with modern technologies
           </p>
         </motion.div>
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
-            {displayedProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                onClick={() => openProject(project)}
-                className="project-card glass-card cursor-pointer group"
-              >
-                {/* Project Image/Placeholder */}
-                <div className="relative h-48 bg-gradient-to-br from-[var(--accent-cyan-dim)] to-[var(--accent-purple-dim)] rounded-t-2xl overflow-hidden">
-                  {project.screenshots && project.screenshots.length > 0 ? (
-                    <img
-                      src={project.screenshots[0]}
-                      alt={project.title}
-                      className="project-image w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-4xl font-bold gradient-text opacity-30">
-                        {project.title.charAt(0)}
+            {displayedProjects.map((project, index) => {
+              const hasImage = project.screenshots && project.screenshots.length > 0;
+              
+              return (
+                <motion.div
+                  key={project.id}
+                  layout
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  onClick={() => openProject(project)}
+                  className="group cursor-pointer"
+                >
+                  <motion.div
+                    whileHover={{ y: -8 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--glass-border)] hover:border-[var(--accent-cyan)]/40 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--accent-cyan)]/10"
+                  >
+                    {/* Image */}
+                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--accent-cyan)]/10 to-[var(--accent-purple)]/10">
+                      {hasImage ? (
+                        <Image
+                          src={project.screenshots[0]}
+                          alt={project.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-6xl font-bold text-[var(--text-muted)]/20 group-hover:text-[var(--accent-cyan)]/30 transition-colors">
+                            {project.title.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-secondary)] to-transparent opacity-80" />
+                      
+                      {/* Quick Links */}
+                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {project.githubUrl && (
+                          <a
+                            href={project.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-9 h-9 rounded-lg bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-[var(--accent-cyan)] transition-colors"
+                          >
+                            <Github size={16} />
+                          </a>
+                        )}
+                        {project.liveUrl && (
+                          <a
+                            href={project.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-9 h-9 rounded-lg bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-[var(--accent-cyan)] transition-colors"
+                          >
+                            <ExternalLink size={16} />
+                          </a>
+                        )}
                       </div>
                     </div>
-                  )}
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent opacity-60" />
-                  
-                  {/* Quick Links */}
-                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-2 rounded-lg bg-black/50 text-white hover:bg-[var(--accent-cyan)] transition-colors"
-                      >
-                        <Github size={16} />
-                      </a>
-                    )}
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-2 rounded-lg bg-black/50 text-white hover:bg-[var(--accent-cyan)] transition-colors"
-                      >
-                        <ExternalLink size={16} />
-                      </a>
-                    )}
-                  </div>
-                </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-cyan)] transition-colors mb-2">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-[var(--text-secondary)] mb-4 line-clamp-2">
-                    {project.shortDescription}
-                  </p>
+                    {/* Content */}
+                    <div className="p-6">
+                      {/* Tech Stack */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {project.techStack.slice(0, 3).map((tech, i) => (
+                          <span
+                            key={i}
+                            className="px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)]"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                        {project.techStack.length > 3 && (
+                          <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+                            +{project.techStack.length - 3}
+                          </span>
+                        )}
+                      </div>
 
-                  {/* Tech Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.techStack.slice(0, 3).map((tech, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-1 rounded-md text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                    {project.techStack.length > 3 && (
-                      <span className="px-2 py-1 rounded-md text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
-                        +{project.techStack.length - 3}
-                      </span>
-                    )}
-                  </div>
+                      {/* Title */}
+                      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-cyan)] transition-colors">
+                        {project.title}
+                      </h3>
 
-                  {/* View More */}
-                  <div className="flex items-center gap-2 text-sm text-[var(--accent-cyan)] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>View Details</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                      {/* Description */}
+                      <p className="text-sm text-[var(--text-secondary)] line-clamp-2 mb-4">
+                        {project.shortDescription}
+                      </p>
+
+                      {/* View Details */}
+                      <div className="flex items-center gap-2 text-sm font-medium text-[var(--accent-cyan)] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>View Details</span>
+                        <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
 
@@ -176,24 +197,24 @@ export default function Projects({ projects }: ProjectsProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ delay: 0.4 }}
             className="mt-12 text-center"
           >
             <motion.button
               onClick={() => setShowAll(!showAll)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--bg-tertiary)] border border-[var(--glass-border)] text-[var(--text-primary)] font-medium hover:border-[var(--accent-cyan)]/50 hover:text-[var(--accent-cyan)] transition-all group"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] text-[var(--text-primary)] font-medium hover:border-[var(--accent-cyan)]/50 hover:text-[var(--accent-cyan)] transition-all"
             >
               {showAll ? (
                 <>
-                  <span>Lihat Lebih Sedikit</span>
-                  <ChevronUp size={18} className="group-hover:-translate-y-0.5 transition-transform" />
+                  <span>Show Less</span>
+                  <ChevronUp size={18} />
                 </>
               ) : (
                 <>
-                  <span>Lihat Selengkapnya ({projectData.length - INITIAL_DISPLAY_COUNT} lainnya)</span>
-                  <ChevronDown size={18} className="group-hover:translate-y-0.5 transition-transform" />
+                  <span>View All ({projectData.length - INITIAL_DISPLAY_COUNT} more)</span>
+                  <ChevronDown size={18} />
                 </>
               )}
             </motion.button>

@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   SiNextdotjs,
   SiReact,
@@ -64,216 +64,311 @@ const skillIcons: Record<string, { Icon: IconType; color: string }> = {
 };
 
 const defaultSkills: Skill[] = [
-  { id: "1", name: "Next.js", category: "Frontend", description: "React framework for production" },
-  { id: "2", name: "React", category: "Frontend", description: "UI component library" },
-  { id: "3", name: "Tailwind CSS", category: "Frontend", description: "Utility-first CSS" },
-  { id: "4", name: "TypeScript", category: "Frontend", description: "Type-safe JavaScript" },
-  { id: "5", name: "JavaScript", category: "Frontend", description: "Dynamic web programming" },
-  { id: "6", name: "Laravel", category: "Backend", description: "PHP web framework" },
-  { id: "7", name: "CodeIgniter", category: "Backend", description: "Lightweight PHP framework" },
-  { id: "8", name: "PHP", category: "Backend", description: "Server-side language" },
-  { id: "9", name: "Node.js", category: "Backend", description: "JavaScript runtime" },
-  { id: "10", name: "REST API", category: "Backend", description: "API development" },
-  { id: "11", name: "PostgreSQL", category: "Database", description: "Advanced SQL database" },
-  { id: "12", name: "MySQL", category: "Database", description: "Popular SQL database" },
+  { id: "1", name: "Next.js", category: "Frontend", description: "React framework" },
+  { id: "2", name: "React", category: "Frontend", description: "UI library" },
+  { id: "3", name: "Tailwind CSS", category: "Frontend", description: "Utility CSS" },
+  { id: "4", name: "TypeScript", category: "Frontend", description: "Type-safe JS" },
+  { id: "5", name: "JavaScript", category: "Frontend", description: "Web language" },
+  { id: "6", name: "Laravel", category: "Backend", description: "PHP framework" },
+  { id: "7", name: "CodeIgniter", category: "Backend", description: "Light PHP" },
+  { id: "8", name: "PHP", category: "Backend", description: "Server-side" },
+  { id: "9", name: "Node.js", category: "Backend", description: "JS runtime" },
+  { id: "10", name: "REST API", category: "Backend", description: "API design" },
+  { id: "11", name: "PostgreSQL", category: "Database", description: "SQL database" },
+  { id: "12", name: "MySQL", category: "Database", description: "SQL database" },
   { id: "13", name: "Prisma", category: "Database", description: "Modern ORM" },
-  { id: "14", name: "Firebase", category: "Database", description: "Cloud database & auth" },
-  { id: "15", name: "Supabase", category: "Database", description: "Open-source Firebase alternative" },
-  { id: "16", name: "Docker", category: "System & Tools", description: "Containerization" },
-  { id: "17", name: "Git", category: "System & Tools", description: "Version control" },
-  { id: "18", name: "Flutter", category: "Mobile", description: "Cross-platform mobile" },
-  { id: "19", name: "Dart", category: "Mobile", description: "Flutter language" },
-  { id: "20", name: "Kotlin", category: "Mobile", description: "Android native development" },
+  { id: "14", name: "Firebase", category: "Database", description: "Cloud DB" },
+  { id: "15", name: "Supabase", category: "Database", description: "Open Firebase" },
+  { id: "16", name: "Docker", category: "Tools", description: "Containers" },
+  { id: "17", name: "Git", category: "Tools", description: "Version control" },
+  { id: "18", name: "Flutter", category: "Mobile", description: "Cross-platform" },
+  { id: "19", name: "Dart", category: "Mobile", description: "Flutter lang" },
+  { id: "20", name: "Kotlin", category: "Mobile", description: "Android native" },
 ];
 
-const categoryConfig: Record<string, { gradient: string; glow: string }> = {
-  Frontend: {
-    gradient: "from-cyan-500 to-blue-500",
-    glow: "group-hover:shadow-cyan-500/30",
-  },
-  Backend: {
-    gradient: "from-purple-500 to-pink-500",
-    glow: "group-hover:shadow-purple-500/30",
-  },
-  Database: {
-    gradient: "from-green-500 to-emerald-500",
-    glow: "group-hover:shadow-green-500/30",
-  },
-  "System & Tools": {
-    gradient: "from-orange-500 to-amber-500",
-    glow: "group-hover:shadow-orange-500/30",
-  },
-  Mobile: {
-    gradient: "from-blue-500 to-indigo-500",
-    glow: "group-hover:shadow-blue-500/30",
-  },
-};
+// 3D Tilt Card Component
+function SkillCard({ skill, index, isInView }: { skill: Skill; index: number; isInView: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  const mouseXSpring = useSpring(x, { stiffness: 500, damping: 50 });
+  const mouseYSpring = useSpring(y, { stiffness: 500, damping: 50 });
+  
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["15deg", "-15deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+    setIsHovered(false);
+  };
+
+  const iconData = skillIcons[skill.name];
+  const Icon = iconData?.Icon;
+  const color = iconData?.color || "#00D4FF";
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50, rotateX: -20 }}
+      animate={isInView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.03,
+        type: "spring",
+        stiffness: 100,
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX: isHovered ? rotateX : 0,
+        rotateY: isHovered ? rotateY : 0,
+        transformStyle: "preserve-3d",
+      }}
+      className="group relative cursor-pointer"
+    >
+      {/* Card */}
+      <div
+        className="relative p-5 rounded-2xl border border-[var(--glass-border)] transition-all duration-500"
+        style={{
+          background: isHovered
+            ? `linear-gradient(135deg, ${color}15 0%, transparent 50%)`
+            : "rgba(17, 17, 27, 0.6)",
+          boxShadow: isHovered
+            ? `0 20px 40px -20px ${color}40, 0 0 30px -5px ${color}20`
+            : "none",
+          borderColor: isHovered ? `${color}50` : undefined,
+        }}
+      >
+        {/* Floating Particles on Hover */}
+        {isHovered && (
+          <>
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 rounded-full"
+                style={{ backgroundColor: color }}
+                initial={{ opacity: 0, y: 0 }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  y: -30,
+                  x: (i - 1) * 15,
+                }}
+                transition={{
+                  duration: 1,
+                  delay: i * 0.2,
+                  repeat: Infinity,
+                }}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Icon Container */}
+        <motion.div
+          className="relative w-14 h-14 mx-auto mb-3 rounded-xl flex items-center justify-center"
+          style={{
+            background: `linear-gradient(135deg, ${color}20 0%, ${color}05 100%)`,
+            transform: "translateZ(30px)",
+          }}
+          animate={isHovered ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          {Icon ? (
+            <Icon
+              className="w-8 h-8 transition-all duration-300"
+              style={{
+                color: color,
+                filter: isHovered ? `drop-shadow(0 0 15px ${color})` : "none",
+              }}
+            />
+          ) : (
+            <span className="text-2xl font-bold" style={{ color }}>
+              {skill.name.charAt(0)}
+            </span>
+          )}
+        </motion.div>
+
+        {/* Name */}
+        <motion.p
+          className="text-sm font-medium text-center transition-colors"
+          style={{
+            color: isHovered ? color : "var(--text-primary)",
+            transform: "translateZ(20px)",
+          }}
+        >
+          {skill.name}
+        </motion.p>
+
+        {/* Glow Ring on Hover */}
+        <motion.div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at center, ${color}10 0%, transparent 70%)`,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isHovered ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
+    </motion.div>
+  );
+}
 
 export default function Skills({ skills }: SkillsProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const skillData = skills && skills.length > 0 ? skills : defaultSkills;
 
-  // Group skills by category
-  const groupedSkills = skillData.reduce((acc, skill) => {
-    if (!acc[skill.category]) {
-      acc[skill.category] = [];
-    }
-    acc[skill.category].push(skill);
-    return acc;
-  }, {} as Record<string, Skill[]>);
+  // Get unique categories
+  const categories = [...new Set(skillData.map((s) => s.category))];
 
-  const categories = Object.keys(groupedSkills);
+  // Filter skills
+  const filteredSkills = activeCategory
+    ? skillData.filter((s) => s.category === activeCategory)
+    : skillData;
 
   return (
-    <section id="skills" className="section relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-cyan-500/5 to-transparent rounded-full" />
+    <section id="skills" className="section relative overflow-hidden bg-[var(--bg-primary)]">
+      {/* Animated Grid Background */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 grid-bg opacity-40" />
+        {/* Scanning Line Animation */}
+        <motion.div
+          className="absolute left-0 right-0 h-32 bg-gradient-to-b from-transparent via-[var(--accent-cyan)]/10 to-transparent pointer-events-none"
+          animate={{ y: ["-100%", "calc(100vh + 100%)"] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+        />
       </div>
 
+      {/* Floating Orbs */}
+      <motion.div
+        className="absolute top-20 left-10 w-72 h-72 rounded-full bg-[var(--accent-purple)]/10 blur-3xl"
+        animate={{ x: [0, 50, 0], y: [0, -30, 0] }}
+        transition={{ duration: 15, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-[var(--accent-cyan)]/10 blur-3xl"
+        animate={{ x: [0, -30, 0], y: [0, 50, 0] }}
+        transition={{ duration: 20, repeat: Infinity }}
+      />
+
       <div className="container mx-auto px-6 relative z-10" ref={ref}>
-        {/* Section Header */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-20 text-center"
+          className="mb-12"
         >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-6"
-          >
-            Tech Stack
-          </motion.span>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="text-[var(--text-primary)]">Skills & </span>
+          <div className="flex items-center gap-3 mb-4">
+            <motion.div
+              className="w-3 h-3 rounded-full bg-[var(--accent-cyan)]"
+              animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <span className="text-sm font-mono text-[var(--accent-cyan)] tracking-widest">TECH_STACK</span>
+          </div>
+          <h2 className="text-4xl md:text-6xl font-bold">
+            <span className="text-[var(--text-primary)]">Skills</span>
+            <span className="text-[var(--accent-purple)]"> & </span>
             <span className="gradient-text">Technologies</span>
           </h2>
-          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-lg">
-            A comprehensive toolkit of modern technologies I use to build scalable, performant applications.
-          </p>
         </motion.div>
 
-        {/* Skills Grid by Category */}
-        <div className="space-y-16">
-          {categories.map((category, categoryIndex) => {
-            const categorySkills = groupedSkills[category] || [];
-            const config = categoryConfig[category] || categoryConfig.Frontend;
-
-            return (
-              <motion.div
-                key={category}
-                initial={{ opacity: 0, y: 40 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: categoryIndex * 0.15 }}
-              >
-                {/* Category Header */}
-                <div className="flex items-center gap-4 mb-8">
-                  <div className={`h-1 w-12 rounded-full bg-gradient-to-r ${config.gradient}`} />
-                  <h3 className="text-xl font-semibold text-[var(--text-primary)]">
-                    {category}
-                  </h3>
-                  <div className="flex-1 h-px bg-gradient-to-r from-[var(--glass-border)] to-transparent" />
-                </div>
-
-                {/* Skills Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                  {categorySkills.map((skill, skillIndex) => {
-                    const iconData = skillIcons[skill.name];
-                    const Icon = iconData?.Icon;
-                    const color = iconData?.color || "#00D4FF";
-
-                    return (
-                      <motion.div
-                        key={skill.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                        transition={{
-                          duration: 0.4,
-                          delay: 0.2 + categoryIndex * 0.1 + skillIndex * 0.05,
-                          type: "spring",
-                          stiffness: 200,
-                        }}
-                        whileHover={{ 
-                          y: -8, 
-                          scale: 1.05,
-                          transition: { duration: 0.2 }
-                        }}
-                        className={`group relative flex flex-col items-center justify-center p-6 rounded-2xl bg-[var(--bg-tertiary)]/50 border border-[var(--glass-border)] backdrop-blur-sm cursor-pointer transition-all duration-300 hover:border-[var(--accent-cyan)]/50 hover:shadow-xl ${config.glow}`}
-                      >
-                        {/* Glow Effect on Hover */}
-                        <div 
-                          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                          style={{
-                            background: `radial-gradient(circle at center, ${color}10 0%, transparent 70%)`,
-                          }}
-                        />
-
-                        {/* Icon */}
-                        <div className="relative mb-4">
-                          {Icon ? (
-                            <Icon 
-                              className="w-12 h-12 transition-all duration-300 group-hover:scale-110" 
-                              style={{ 
-                                color: color,
-                                filter: `drop-shadow(0 0 8px ${color}40)`,
-                              }}
-                            />
-                          ) : (
-                            <div 
-                              className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl"
-                            >
-                              {skill.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Name */}
-                        <span className="text-sm font-medium text-[var(--text-primary)] text-center group-hover:text-white transition-colors">
-                          {skill.name}
-                        </span>
-
-                        {/* Description Tooltip on Hover */}
-                        {skill.description && (
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-20">
-                            <div className="px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--glass-border)] shadow-xl whitespace-nowrap">
-                              <span className="text-xs text-[var(--text-secondary)]">
-                                {skill.description}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Bottom Stats */}
+        {/* Category Filter - Pill Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-20 flex flex-wrap justify-center gap-8 md:gap-16"
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap gap-3 mb-12"
         >
-          {[
-            { label: "Technologies", value: skillData.length + "+" },
-            { label: "Categories", value: categories.length },
-            { label: "Years Learning", value: "3+" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <span className="text-3xl md:text-4xl font-bold gradient-text">{stat.value}</span>
-              <p className="text-[var(--text-muted)] text-sm mt-1">{stat.label}</p>
-            </div>
+          <motion.button
+            onClick={() => setActiveCategory(null)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+              activeCategory === null
+                ? "bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-purple)] text-white shadow-lg shadow-[var(--accent-cyan)]/30"
+                : "bg-[var(--bg-secondary)] border border-[var(--glass-border)] text-[var(--text-secondary)] hover:border-[var(--accent-cyan)]/50"
+            }`}
+          >
+            All ({skillData.length})
+          </motion.button>
+          {categories.map((cat) => {
+            const count = skillData.filter((s) => s.category === cat).length;
+            return (
+              <motion.button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                  activeCategory === cat
+                    ? "bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-purple)] text-white shadow-lg shadow-[var(--accent-cyan)]/30"
+                    : "bg-[var(--bg-secondary)] border border-[var(--glass-border)] text-[var(--text-secondary)] hover:border-[var(--accent-cyan)]/50"
+                }`}
+              >
+                {cat} ({count})
+              </motion.button>
+            );
+          })}
+        </motion.div>
+
+        {/* Skills Masonry Grid */}
+        <motion.div
+          layout
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+        >
+          {filteredSkills.map((skill, index) => (
+            <SkillCard key={skill.id} skill={skill} index={index} isInView={isInView} />
           ))}
+        </motion.div>
+
+        {/* Animated Counter Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.5 }}
+          className="mt-20 flex justify-center"
+        >
+          <div className="inline-flex items-center gap-8 md:gap-16 px-8 py-6 rounded-2xl bg-[var(--bg-secondary)]/50 border border-[var(--glass-border)] backdrop-blur-sm">
+            {[
+              { value: filteredSkills.length, label: "SKILLS", suffix: "" },
+              { value: categories.length, label: "CATEGORIES", suffix: "" },
+              { value: 3, label: "YEARS", suffix: "+" },
+            ].map((stat, i) => (
+              <div key={i} className="text-center">
+                <motion.div
+                  className="text-3xl md:text-4xl font-bold font-mono gradient-text"
+                  initial={{ opacity: 0 }}
+                  animate={isInView ? { opacity: 1 } : {}}
+                  transition={{ delay: 0.7 + i * 0.1 }}
+                >
+                  {stat.value}{stat.suffix}
+                </motion.div>
+                <div className="text-xs text-[var(--text-muted)] mt-1 tracking-widest">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

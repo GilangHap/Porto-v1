@@ -106,7 +106,7 @@ export default function SettingsClient({ settings }: SettingsClientProps) {
                     value={formData.heroSubtitle}
                     onChange={(e) => setFormData({ ...formData, heroSubtitle: e.target.value })}
                     className="input-field"
-                    placeholder="Informatics Undergraduate • Web Developer"
+                    placeholder="Web Developer"
                   />
                 </div>
                 <div>

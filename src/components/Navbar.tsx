@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Github, Download } from "lucide-react";
+import Image from "next/image";
 
 const navLinks = [
   { name: "Home", href: "#home" },
@@ -63,7 +64,7 @@ export default function Navbar({ githubUrl = "https://github.com/GilangHap" }: N
         transition={{ duration: 0.5 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "glass shadow-lg"
+            ? "bg-[var(--bg-primary)]/80 backdrop-blur-xl shadow-lg"
             : "bg-transparent"
         }`}
       >
@@ -76,11 +77,17 @@ export default function Navbar({ githubUrl = "https://github.com/GilangHap" }: N
                 e.preventDefault();
                 scrollToSection("#home");
               }}
-              className="text-xl md:text-2xl font-bold gradient-text"
+              className="flex items-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {"<G/>"}
+              <Image
+                src="/g_logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className="w-8 h-8 md:w-10 md:h-10"
+              />
             </motion.a>
 
             {/* Desktop Navigation */}
@@ -163,7 +170,7 @@ export default function Navbar({ githubUrl = "https://github.com/GilangHap" }: N
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div
-              className="absolute right-0 top-0 bottom-0 w-72 glass flex flex-col"
+              className="absolute right-0 top-0 bottom-0 w-72 bg-[var(--bg-secondary)] flex flex-col"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -183,7 +190,7 @@ export default function Navbar({ githubUrl = "https://github.com/GilangHap" }: N
                       transition={{ delay: index * 0.1 }}
                       className={`text-lg font-medium py-2 px-4 rounded-lg transition-colors ${
                         activeSection === link.href.substring(1)
-                          ? "text-[var(--accent-cyan)] bg-[var(--accent-cyan-dim)]"
+                          ? "text-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10"
                           : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                       }`}
                     >

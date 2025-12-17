@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, Phone, Heart } from "lucide-react";
+import Image from "next/image";
 
 interface FooterProps {
   settings?: {
@@ -40,12 +41,17 @@ export default function Footer({ settings }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
           {/* Brand */}
           <div className="space-y-4">
-            <motion.h3
-              className="text-2xl font-bold gradient-text"
+            <motion.div
               whileHover={{ scale: 1.02 }}
             >
-              {"<G/>"}
-            </motion.h3>
+              <Image
+                src="/g_logo.png"
+                alt="Logo"
+                width={48}
+                height={48}
+                className="w-12 h-12"
+              />
+            </motion.div>
             <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
               Building scalable web systems with clean architecture, modern UI,
               and security-aware implementation.

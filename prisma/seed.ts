@@ -6,6 +6,17 @@ async function main() {
   console.log("🌱 Starting database seed...");
 
   // ============================================
+  // FRESH SEED - Delete all existing data first
+  // ============================================
+  console.log("🗑️  Clearing existing data...");
+  await prisma.experience.deleteMany();
+  await prisma.project.deleteMany();
+  await prisma.skill.deleteMany();
+  await prisma.about.deleteMany();
+  await prisma.siteSettings.deleteMany();
+  console.log("✅ Existing data cleared");
+
+  // ============================================
   // SITE SETTINGS
   // ============================================
   const settings = await prisma.siteSettings.upsert({
@@ -15,7 +26,7 @@ async function main() {
       id: "main-settings",
       heroTitle: "Gilang Happy Dwinugroho",
       heroSubtitle:
-        "Informatics Undergraduate • Web Developer • System Builder",
+        "Web Developer • System Builder",
       heroDescription:
         "I build scalable web systems with clean architecture, modern UI, and security-aware implementation.",
       email: "gilanghappy123@gmail.com",
